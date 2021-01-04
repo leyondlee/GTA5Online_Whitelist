@@ -241,22 +241,60 @@ void MainWindow::setFirewallStatus()
 
 QString MainWindow::getAddressScope()
 {
-    QHostAddress minHostAddress = IPTool::getQHostAddress(MIN_ADDRESS);
+    QString minAddress = MIN_ADDRESS;
+    QString maxAddress = MAX_ADDRESS;
+
+    QStringList addresses;
+    for (int i = 0; i < addressListWidget->count(); i += 1) {
+        QString address = addressListWidget->item(i)->text();
+        addresses.append(address);
+    }
+
+    for (int i = 0; i < addresses.count(); i += 1) {
+        QString address = addresses[i];
+        if (QString::compare(address, minAddress, Qt::CaseSensitive) != 0) {
+            break;
+        }
+
+        minAddress = IPTool::incrementAddress(address);
+    }
+
+    for (int i = addresses.count() - 1; i >= 0; i -= 1) {
+        QString address = addresses[i];
+        if (QString::compare(address, maxAddress, Qt::CaseSensitive) != 0) {
+            break;
+        }
+
+        maxAddress = IPTool::decrementAddress(address);
+    }
+
+    QHostAddress minHostAddress = IPTool::getQHostAddress(minAddress);
     quint32 minIpv4Address = minHostAddress.toIPv4Address();
 
-    QHostAddress maxHostAddress = IPTool::getQHostAddress(MAX_ADDRESS);
+    QHostAddress maxHostAddress = IPTool::getQHostAddress(maxAddress);
     quint32 maxIpv4Address = maxHostAddress.toIPv4Address();
 
-    QString scope = QString("%1-").arg(MIN_ADDRESS);
+    QString scope = QString("%1-").arg(minAddress);
     for (int i = 0; i < addressListWidget->count(); i += 1) {
         QString address = addressListWidget->item(i)->text();
         QHostAddress hostAddress = IPTool::getQHostAddress(address);
         quint32 ipv4Address = hostAddress.toIPv4Address();
         if (!hostAddress.isNull() && ipv4Address > minIpv4Address && ipv4Address < maxIpv4Address) {
-            scope = QString("%1%2,%3-").arg(scope, IPTool::decrementAddress(address), IPTool::incrementAddress(address));
+            QString nextStartAddress = IPTool::incrementAddress(address);
+            for (int j = i + 1; j < addressListWidget->count(); j += 1) {
+                QString address = addressListWidget->item(j)->text();
+                if (nextStartAddress != address) {
+                    break;
+                }
+
+                nextStartAddress = IPTool::incrementAddress(address);
+                i += 1;
+            }
+
+            scope = QString("%1%2,%3-").arg(scope, IPTool::decrementAddress(address), nextStartAddress);
         }
     }
-    scope = QString("%1%2").arg(scope, MAX_ADDRESS);
+    scope = QString("%1%2").arg(scope, maxAddress);
 
     return scope;
 }

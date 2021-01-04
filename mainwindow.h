@@ -63,6 +63,5 @@ private:
     QString getSettingsFilepath();
     void onFailAddRules();
     void onWhitelistToggleShortcutActivated();
-    bool nativeEvent(const QByteArray &eventType, void *message, long *result);
 };
 #endif // MAINWINDOW_H
