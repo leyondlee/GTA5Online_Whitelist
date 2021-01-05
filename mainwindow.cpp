@@ -32,11 +32,36 @@ MainWindow::MainWindow(QWidget *parent)
     connect(customAddressListWidget, &CustomAddressListWidget::selectionRemoved, this, &MainWindow::onSelectionRemoved);
 
     initWhitelist();
+
+    auto hotkey = new QHotkey(QKeySequence(Qt::CTRL + Qt::Key_F10), true, this);
+    QObject::connect(hotkey, &QHotkey::activated, this, &MainWindow::onWhitelistHotkeyActivated);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::onWhitelistHotkeyActivated()
+{
+    if (isWhitelistOn()) {
+        if (turnWhitelistOff(false)) {
+            QSound::play(":/sounds/WhitelistTurnedOff.wav");
+        } else {
+            QSound::play(":/sounds/SomethingWentWrong.wav");
+        }
+    } else {
+        if (turnWhitelistOn(false)) {
+            QSound::play(":/sounds/WhitelistTurnedOn.wav");
+        } else {
+            QSound::play(":/sounds/SomethingWentWrong.wav");
+        }
+    }
+}
+
+bool MainWindow::isWhitelistOn()
+{
+    return whitelistOffPushButton->isEnabled();
 }
 
 void MainWindow::initWhitelist()
@@ -80,7 +105,7 @@ bool MainWindow::isAddressInList(QString address)
 
 void MainWindow::onSelectionRemoved(QMap<QString, QVariant> itemsRemoved)
 {
-    if (whitelistOffPushButton->isEnabled()) {
+    if (isWhitelistOn()) {
         if (!addFirewallRules()) {
             onFailAddRules();
         }
@@ -108,7 +133,7 @@ void MainWindow::onAddButtonClicked(bool checked)
             }
         }
 
-        if (whitelistOffPushButton->isEnabled() && !addFirewallRules()) {
+        if (isWhitelistOn() && !addFirewallRules()) {
             onFailAddRules();
         }
 
@@ -274,6 +299,10 @@ QString MainWindow::getAddressScope()
     QHostAddress maxHostAddress = IPTool::getQHostAddress(maxAddress);
     quint32 maxIpv4Address = maxHostAddress.toIPv4Address();
 
+    if (minIpv4Address > maxIpv4Address) {
+        return QString("0.0.0.0");
+    }
+
     QString scope = QString("%1-").arg(minAddress);
     for (int i = 0; i < addressListWidget->count(); i += 1) {
         QString address = addressListWidget->item(i)->text();
@@ -345,32 +374,12 @@ bool MainWindow::addFirewallRules()
 
 void MainWindow::onWhitelistOnButtonClicked(bool checked)
 {
-    if (!firewallTool->isInitialised()) {
-        return;
-    }
-
-    if (!addFirewallRules()) {
-        onFailAddRules();
-        return;
-    }
-
-    whitelistOnPushButton->setEnabled(false);
-    whitelistOffPushButton->setEnabled(true);
+    turnWhitelistOn(true);
 }
 
 void MainWindow::onWhitelistOffButtonClicked(bool checked)
 {
-    if (!firewallTool->isInitialised()) {
-        return;
-    }
-
-    if (!removeFirewallRules()) {
-        QMessageBox::critical(this, "Error", QString("Unable to remove inbound/outbound rules.\n\n%1").arg(firewallTool->getError()));
-        return;
-    }
-
-    whitelistOnPushButton->setEnabled(true);
-    whitelistOffPushButton->setEnabled(false);
+    turnWhitelistOff(true);
 }
 
 QString MainWindow::getSettingsFilepath()
@@ -382,4 +391,44 @@ void MainWindow::onFailAddRules()
 {
     QMessageBox::critical(this, "Error", QString("Fail to add inbound/outbound rule.\n\n%1").arg(firewallTool->getError()));
     removeFirewallRules();
+}
+
+bool MainWindow::turnWhitelistOn(bool prompt)
+{
+    if (!firewallTool->isInitialised()) {
+        return false;
+    }
+
+    if (!addFirewallRules()) {
+        if (prompt) {
+            onFailAddRules();
+        }
+
+        return false;
+    }
+
+    whitelistOnPushButton->setEnabled(false);
+    whitelistOffPushButton->setEnabled(true);
+
+    return true;
+}
+
+bool MainWindow::turnWhitelistOff(bool prompt)
+{
+    if (!firewallTool->isInitialised()) {
+        return false;
+    }
+
+    if (!removeFirewallRules()) {
+        if (prompt) {
+            QMessageBox::critical(this, "Error", QString("Unable to remove inbound/outbound rules.\n\n%1").arg(firewallTool->getError()));
+        }
+
+        return false;
+    }
+
+    whitelistOnPushButton->setEnabled(true);
+    whitelistOffPushButton->setEnabled(false);
+
+    return true;
 }

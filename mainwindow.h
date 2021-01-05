@@ -7,6 +7,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QShortcut>
+#include <QSound>
+#include <QHotkey>
 
 #include "addaddressdialog.h"
 #include "firewalltool.h"
@@ -63,5 +65,9 @@ private:
     QString getSettingsFilepath();
     void onFailAddRules();
     void onWhitelistToggleShortcutActivated();
+    bool isWhitelistOn();
+    void onWhitelistHotkeyActivated();
+    bool turnWhitelistOn(bool prompt = false);
+    bool turnWhitelistOff(bool prompt = false);
 };
 #endif // MAINWINDOW_H
