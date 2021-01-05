@@ -80,7 +80,7 @@ void MainWindow::initWhitelist()
 
     if (firewallTool->hasRule(getInboundRuleName()) && firewallTool->hasRule(getOutboundRuleName())) {
         if (!addFirewallRules()) {
-            onFailAddRules();
+            onFailAddRules(true);
         }
 
         whitelistOnPushButton->setEnabled(false);
@@ -107,7 +107,7 @@ void MainWindow::onSelectionRemoved(QMap<QString, QVariant> itemsRemoved)
 {
     if (isWhitelistOn()) {
         if (!addFirewallRules()) {
-            onFailAddRules();
+            onFailAddRules(true);
         }
     }
 
@@ -134,7 +134,7 @@ void MainWindow::onAddButtonClicked(bool checked)
         }
 
         if (isWhitelistOn() && !addFirewallRules()) {
-            onFailAddRules();
+            onFailAddRules(true);
         }
 
         saveAddresses(true);
@@ -387,9 +387,12 @@ QString MainWindow::getSettingsFilepath()
     return QDir(QGuiApplication::applicationDirPath()).filePath(SETTINGS_FILENAME);
 }
 
-void MainWindow::onFailAddRules()
+void MainWindow::onFailAddRules(bool prompt)
 {
-    QMessageBox::critical(this, "Error", QString("Fail to add inbound/outbound rule.\n\n%1").arg(firewallTool->getError()));
+    if (prompt) {
+        QMessageBox::critical(this, "Error", QString("Fail to add inbound/outbound rule.\n\n%1").arg(firewallTool->getError()));
+    }
+
     removeFirewallRules();
 }
 
@@ -400,9 +403,7 @@ bool MainWindow::turnWhitelistOn(bool prompt)
     }
 
     if (!addFirewallRules()) {
-        if (prompt) {
-            onFailAddRules();
-        }
+        onFailAddRules(prompt);
 
         return false;
     }

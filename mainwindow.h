@@ -63,7 +63,7 @@ private:
     QString getInboundRuleName();
     QString getOutboundRuleName();
     QString getSettingsFilepath();
-    void onFailAddRules();
+    void onFailAddRules(bool prompt = false);
     void onWhitelistToggleShortcutActivated();
     bool isWhitelistOn();
     void onWhitelistHotkeyActivated();
