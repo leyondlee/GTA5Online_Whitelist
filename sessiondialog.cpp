@@ -115,7 +115,7 @@ int SessionDialog::addAddressToTable(QString address)
     QNetworkRequest request(url);
     QNetworkReply *reply = manager->get(request);
     connect(reply, &QNetworkReply::finished, [=]() {
-        if (item != nullptr) {
+        if (item == getAddressTableWidgetItem(address)) {
             QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
             QJsonObject jsonObject = jsonDocument.object();
 
@@ -178,7 +178,6 @@ void SessionDialog::updateAddressTable()
     for (int i = 0; i < itemsToRemove.count(); i += 1) {
         QTableWidgetItem *item = itemsToRemove[i];
         addressTableWidget->removeRow(item->row());
-        item = nullptr;
     }
 
     setFoundCount();

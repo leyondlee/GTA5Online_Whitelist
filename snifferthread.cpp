@@ -1,4 +1,4 @@
-#include "sniffer.h"
+#include "snifferthread.h"
 
 SnifferThread::SnifferThread(pcap_t *adhandle, QObject *parent): QThread(parent)
 {

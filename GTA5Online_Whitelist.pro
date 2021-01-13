@@ -30,7 +30,8 @@ HEADERS += \
     mainwindow.h \
     selectdevicedialog.h \
     sessiondialog.h \
-    sniffer.h
+    sniffer.h \
+    snifferthread.h
 
 FORMS += \
     addaddressdialog.ui \
