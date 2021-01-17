@@ -32,22 +32,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(customAddressListWidget, &CustomAddressListWidget::selectionRemoved, this, &MainWindow::onSelectionRemoved);
 
     initWhitelist();
-
-    auto hotkey = new QHotkey(QKeySequence(Qt::CTRL + Qt::Key_F10), true, this);
-    QObject::connect(hotkey, &QHotkey::activated, this, &MainWindow::onWhitelistHotkeyActivated);
-
-    trayIcon = new QSystemTrayIcon(this);
-    trayIcon->setIcon(QIcon(":icons/icon_tray.png"));
-    trayIcon->setToolTip(windowTitle());
-    trayIcon->show();
-    connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onIconActivated);
-
-    QAction *quitAction = new QAction("Quit", this);
-    connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
-
-    QMenu *trayMenu = new QMenu(this);
-    trayMenu->addAction(quitAction);
-    trayIcon->setContextMenu(trayMenu);
+    initHotkey();
+    initTrayIcon();
 }
 
 MainWindow::~MainWindow()
@@ -105,6 +91,42 @@ void MainWindow::onWhitelistHotkeyActivated()
 bool MainWindow::isWhitelistOn()
 {
     return whitelistOffPushButton->isEnabled();
+}
+
+void MainWindow::initHotkey()
+{
+    hotkey = new QHotkey(QKeySequence(Qt::CTRL + Qt::Key_F10), true, this);
+    connect(hotkey, &QHotkey::activated, this, &MainWindow::onWhitelistHotkeyActivated);
+}
+
+void MainWindow::initTrayIcon()
+{
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setToolTip(windowTitle());
+
+    setTrayIcon();
+
+    trayIcon->show();
+    connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onIconActivated);
+
+    QAction *quitAction = new QAction("Quit", this);
+    connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
+
+    QMenu *trayMenu = new QMenu(this);
+    trayMenu->addAction(quitAction);
+    trayIcon->setContextMenu(trayMenu);
+}
+
+void MainWindow::setTrayIcon()
+{
+    QIcon icon;
+    if (isWhitelistOn()) {
+        icon = QIcon(":/icons/icon_tray_on.png");
+    } else {
+        icon = QIcon(":/icons/icon_tray_off.png");
+    }
+
+    trayIcon->setIcon(icon);
 }
 
 void MainWindow::initWhitelist()
@@ -454,6 +476,8 @@ bool MainWindow::turnWhitelistOn(bool prompt)
     whitelistOnPushButton->setEnabled(false);
     whitelistOffPushButton->setEnabled(true);
 
+    setTrayIcon();
+
     return true;
 }
 
@@ -473,6 +497,8 @@ bool MainWindow::turnWhitelistOff(bool prompt)
 
     whitelistOnPushButton->setEnabled(true);
     whitelistOffPushButton->setEnabled(false);
+
+    setTrayIcon();
 
     return true;
 }

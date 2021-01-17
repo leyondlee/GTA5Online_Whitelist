@@ -51,6 +51,7 @@ private:
     QLabel *selectCountLabel;
     FirewallTool *firewallTool;
     CustomAddressListWidget *customAddressListWidget;
+    QHotkey *hotkey;
     QSystemTrayIcon *trayIcon;
 
     void onAddButtonClicked(bool checked);
@@ -76,5 +77,8 @@ private:
     bool turnWhitelistOn(bool prompt = false);
     bool turnWhitelistOff(bool prompt = false);
     void onIconActivated(QSystemTrayIcon::ActivationReason reason);
+    void initHotkey();
+    void initTrayIcon();
+    void setTrayIcon();
 };
 #endif // MAINWINDOW_H

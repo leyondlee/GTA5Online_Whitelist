@@ -52,3 +52,5 @@ LIBS += -lws2_32 -lole32 -loleaut32 -lcomsuppw
 RC_ICONS = icons/icon.ico
 
 include($$PWD/../../Downloads/QHotkey-1.4.2/qhotkey.pri)
+include($$PWD/../../Downloads/SingleApplication-3.2.0/singleapplication.pri)
+DEFINES += QAPPLICATION_CLASS=QApplication
