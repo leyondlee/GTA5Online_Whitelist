@@ -49,6 +49,6 @@ INCLUDEPATH += $$PWD/../../Downloads/npcap-sdk-1.06/Include
 
 LIBS += -lws2_32 -lole32 -loleaut32 -lcomsuppw
 
-RC_ICONS = icon.ico
+RC_ICONS = icons/icon.ico
 
 include($$PWD/../../Downloads/QHotkey-1.4.2/qhotkey.pri)

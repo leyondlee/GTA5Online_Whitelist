@@ -9,6 +9,8 @@
 #include <QShortcut>
 #include <QSound>
 #include <QHotkey>
+#include <QSystemTrayIcon>
+#include <QMenu>
 
 #include "addaddressdialog.h"
 #include "firewalltool.h"
@@ -17,7 +19,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define APPNAME "GTA5Online_Whitelist"
+#define APP_NAME "GTA5Online_Whitelist"
 #define GTA5ONLINE_PORT 6672
 #define MIN_ADDRESS "1.1.1.1"
 #define MAX_ADDRESS "255.255.255.254"
@@ -35,6 +37,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     Ui::MainWindow *ui;
     QLabel *statusLabel;
@@ -46,6 +51,7 @@ private:
     QLabel *selectCountLabel;
     FirewallTool *firewallTool;
     CustomAddressListWidget *customAddressListWidget;
+    QSystemTrayIcon *trayIcon;
 
     void onAddButtonClicked(bool checked);
     void setFirewallStatus();
@@ -69,5 +75,6 @@ private:
     void onWhitelistHotkeyActivated();
     bool turnWhitelistOn(bool prompt = false);
     bool turnWhitelistOff(bool prompt = false);
+    void onIconActivated(QSystemTrayIcon::ActivationReason reason);
 };
 #endif // MAINWINDOW_H

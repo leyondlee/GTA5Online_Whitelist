@@ -35,11 +35,54 @@ MainWindow::MainWindow(QWidget *parent)
 
     auto hotkey = new QHotkey(QKeySequence(Qt::CTRL + Qt::Key_F10), true, this);
     QObject::connect(hotkey, &QHotkey::activated, this, &MainWindow::onWhitelistHotkeyActivated);
+
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setIcon(QIcon(":icons/icon_tray.png"));
+    trayIcon->setToolTip(windowTitle());
+    trayIcon->show();
+    connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onIconActivated);
+
+    QAction *quitAction = new QAction("Quit", this);
+    connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
+
+    QMenu *trayMenu = new QMenu(this);
+    trayMenu->addAction(quitAction);
+    trayIcon->setContextMenu(trayMenu);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    #ifdef Q_OS_MACOS
+    if (!event->spontaneous() || !isVisible()) {
+        return;
+    }
+    #endif
+
+    if (trayIcon->isVisible()) {
+        trayIcon->showMessage(APP_NAME, "The program will keep running in the system tray.");
+        hide();
+        event->ignore();
+    }
+}
+
+void MainWindow::onIconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason) {
+    case QSystemTrayIcon::Trigger:
+        break;
+    case QSystemTrayIcon::DoubleClick:
+        show();
+        break;
+    case QSystemTrayIcon::MiddleClick:
+        break;
+    default:
+        ;
+    }
 }
 
 void MainWindow::onWhitelistHotkeyActivated()
@@ -330,12 +373,12 @@ QString MainWindow::getAddressScope()
 
 QString MainWindow::getInboundRuleName()
 {
-    return QString("%1 - Inbound").arg(APPNAME);
+    return QString("%1 - Inbound").arg(APP_NAME);
 }
 
 QString MainWindow::getOutboundRuleName()
 {
-    return QString("%1 - Outbound").arg(APPNAME);
+    return QString("%1 - Outbound").arg(APP_NAME);
 }
 
 bool MainWindow::removeFirewallRules()
@@ -366,8 +409,8 @@ bool MainWindow::addFirewallRules()
     QString localPorts = QString("%1").arg(GTA5ONLINE_PORT);
     QString remoteAddresses = getAddressScope();
 
-    bool inboundSuccess = firewallTool->addRule(inboundRuleName, "", APPNAME, "", NET_FW_IP_PROTOCOL_UDP, "", localPorts, remoteAddresses, "", NET_FW_RULE_DIR_IN, NET_FW_ACTION_BLOCK, true);
-    bool outboundSuccess = firewallTool->addRule(outboundRuleName, "", APPNAME, "", NET_FW_IP_PROTOCOL_UDP, "", localPorts, remoteAddresses, "", NET_FW_RULE_DIR_OUT, NET_FW_ACTION_BLOCK, true);
+    bool inboundSuccess = firewallTool->addRule(inboundRuleName, "", APP_NAME, "", NET_FW_IP_PROTOCOL_UDP, "", localPorts, remoteAddresses, "", NET_FW_RULE_DIR_IN, NET_FW_ACTION_BLOCK, true);
+    bool outboundSuccess = firewallTool->addRule(outboundRuleName, "", APP_NAME, "", NET_FW_IP_PROTOCOL_UDP, "", localPorts, remoteAddresses, "", NET_FW_RULE_DIR_OUT, NET_FW_ACTION_BLOCK, true);
 
     return inboundSuccess && outboundSuccess;
 }

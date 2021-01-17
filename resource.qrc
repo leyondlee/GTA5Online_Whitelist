@@ -3,5 +3,6 @@
         <file>sounds/SomethingWentWrong.wav</file>
         <file>sounds/WhitelistTurnedOff.wav</file>
         <file>sounds/WhitelistTurnedOn.wav</file>
+        <file>icons/icon_tray.png</file>
     </qresource>
 </RCC>
