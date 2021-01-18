@@ -1,6 +1,8 @@
 #include <QObject>
 #include <QDebug>
 #include <QVariant>
+#include <QtWin>
+#include <QByteArray>
 
 #include <windows.h>
 #include <netfw.h>
