@@ -64,7 +64,7 @@ QString FirewallTool::formatHResult(HRESULT hr)
     QString str = QtWin::errorStringFromHresult(hr);
     if (str.isEmpty()) {
         QString hex = QByteArray::number((qint32) hr, 16);
-        for (int i = 0; i < hex.count() - 8; i += 1) {
+        for (int i = 0; i < (8 - hex.count()); i += 1) {
             hex.prepend('0');
         }
         str = QString("0x%1").arg(hex);
