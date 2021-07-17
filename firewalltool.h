@@ -12,6 +12,8 @@
 #ifndef FIREWALLTOOL_H
 #define FIREWALLTOOL_H
 
+#define HEX_MIN_LENGTH 8
+
 class FirewallTool : public QObject
 {
     Q_OBJECT
